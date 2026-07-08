@@ -8,6 +8,7 @@ services:
       - /tmp
     volumes:
       - code_tunnel_home:/home/tunnel
+      - ./gitconfig:/home/tunnel/.gitconfig:ro
       - ~/Projects:/home/tunnel/Projects:ro
       - ~/Projects/algorithm-practice:/home/tunnel/Projects/algorithm-practice:rw
 

@@ -63,11 +63,14 @@ volume: 認証情報・トンネル名")]
 
 - VS Code Remote Tunnelsを常時起動し、iPad等からの接続口を提供すること
 - `~/Projects`配下のファイルを閲覧・編集可能にすること(書き込みは[5.](#5-マウント方針)で許可したプロジェクトのみ)
+- 書き込み許可したプロジェクトについて、最低限のgit操作(`git add`/`commit`等)を可能にすること
 
 対象外(out-of-scope):
 
 - hermes/openclowの実行(別コンテナが担う)
 - Dockerのビルド・実行(プロジェクトごとにDocker環境が必要な場合は、rootless DinDなど別途隔離された仕組みを検討する。このコンテナにdocker.sockを持ち込まない)
+- Nix/direnvなどプロジェクト固有の開発ツールチェーンの提供(実測したところイメージが数GB規模に膨らむため採用しない。この種の作業はMac本体へSSHで接続して行う。責任を「軽量な閲覧・編集・commit専用の入口」と「重い開発作業」に分離する)
+- `git push`(認証情報を持ち込んでいないため未対応。将来対応する場合はスコープを絞ったPAT注入を別途検討する)
 
 ## 4. セットアップ
 
@@ -133,6 +136,8 @@ volumes:
 > [!NOTE]
 > `~/Projects`直下に秘密情報を含むファイル(`.env`等)を置かないでください。ディレクトリ全体が(読み取り専用ではあっても)このコンテナから見える前提で運用します。
 
+git commitの著者情報(`user.name`/`user.email`)は、リポジトリ直下の[`gitconfig`](./gitconfig)を`/home/tunnel/.gitconfig`へ読み取り専用でマウントする形で渡しています。Dockerfileに焼き込まない理由は、変更のたびにイメージを再ビルドせずに済むためです。値を変えたい場合は`gitconfig`を編集して`just up`するだけで反映されます。
+
 ## 6. 運用ルール
 
 | 項目 | ルール |
@@ -180,3 +185,4 @@ docker compose logs --tail=50 -f
 | 再起動後にiPadから繋がらない | `code tunnel`プロセス自体が起動していない、または認証情報が永続化されていない | `docker compose ps`でコンテナが`Up`か確認し、`docker compose logs`でログイン状態を確認する |
 | `rename`後もログが古いdevice codeの入力待ちのまま進まない | メインのトンネルプロセスと`rename`が別々に認証し、メインプロセスが新しいトークンに気づいていない | [4.3.](#43-トンネル名を分かりやすくする)の通り`docker compose restart code-tunnel`で読み直させる |
 | `~/Projects`配下が空に見える(エラーは出ない) | `~/Projects`がホスト側に存在しないまま`docker compose up -d`を直接実行した。Docker Desktop(Mac)はこの場合エラーを出さず、コンテナ内だけに見かけ上の空フォルダを作る | `docker compose up -d`ではなく`just up`を使う(`~/Projects`を事前に作成してから起動する) |
+| Dockerfileに追加した設定(`git config`等)が反映されない | `code_tunnel_home`ボリュームは初回作成時にしかイメージの内容をコピーしない。既にボリュームが存在する状態で再ビルドしても、そのボリューム配下のファイルは上書きされない | `docker exec code-tunnel git config --global ...`のように、稼働中のコンテナへ直接設定を当てる |

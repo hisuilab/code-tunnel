@@ -1,6 +1,11 @@
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV EDITOR=nano
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl ca-certificates git less nano \
     && rm -rf /var/lib/apt/lists/* \
     && useradd -m -s /bin/bash tunnel
 

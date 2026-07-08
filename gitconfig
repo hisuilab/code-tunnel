@@ -1,0 +1,9 @@
+[user]
+	name = hisuilab
+	email = hisuilab@gmail.com
+
+[core]
+	editor = nano
+
+[init]
+	defaultBranch = main

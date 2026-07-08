@@ -176,6 +176,9 @@ docker compose ps              # 状態確認
 docker compose logs --tail=50 -f
 ```
 
+> [!IMPORTANT]
+> 最後の`docker compose logs`は必須の確認手順です。`To grant access to the server, please log into https://github.com/login/device and use code ...`が表示された場合、認証が無効になっているので、そのURL・コードでログインし直すまでiPad等からは接続できません([9.](#9-トラブルシューティング)の「`rename`していないのに毎回新しいdevice codeを要求される」も参照)。`➜ Tunnel: {名前}`と`➜ Open: ...`が出ていれば確認完了です。
+
 ## 9. トラブルシューティング
 
 | 症状 | 原因 | 対処 |
@@ -185,4 +188,5 @@ docker compose logs --tail=50 -f
 | 再起動後にiPadから繋がらない | `code tunnel`プロセス自体が起動していない、または認証情報が永続化されていない | `docker compose ps`でコンテナが`Up`か確認し、`docker compose logs`でログイン状態を確認する |
 | `rename`後もログが古いdevice codeの入力待ちのまま進まない | メインのトンネルプロセスと`rename`が別々に認証し、メインプロセスが新しいトークンに気づいていない | [4.3.](#43-トンネル名を分かりやすくする)の通り`docker compose restart code-tunnel`で読み直させる |
 | `~/Projects`配下が空に見える(エラーは出ない) | `~/Projects`がホスト側に存在しないまま`docker compose up -d`を直接実行した。Docker Desktop(Mac)はこの場合エラーを出さず、コンテナ内だけに見かけ上の空フォルダを作る | `docker compose up -d`ではなく`just up`を使う(`~/Projects`を事前に作成してから起動する) |
+| `rename`していないのに毎回新しいdevice codeを要求される | イメージの再ビルド・コンテナ再作成(`docker compose build` → `up -d`)を短時間に繰り返すと、`code tunnel`プロセスが認証状態を書き込んでいる最中に停止させられ、`token.json`が残っていてもセッションが無効になることがある | `docker exec code-tunnel /home/tunnel/code tunnel user show`で`not logged in`と出れば確定。表示された device code で再ログインする。開発中にDockerfileを連続で変更する場合は、都度`docker compose logs`でログイン状態を確認してから次の変更に進む |
 | Dockerfileに追加した設定(`git config`等)が反映されない | `code_tunnel_home`ボリュームは初回作成時にしかイメージの内容をコピーしない。既にボリュームが存在する状態で再ビルドしても、そのボリューム配下のファイルは上書きされない | `docker exec code-tunnel git config --global ...`のように、稼働中のコンテナへ直接設定を当てる |

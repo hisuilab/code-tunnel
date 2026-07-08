@@ -1,0 +1,13 @@
+[global]
+# MD013: 日本語文書と長いリンクを不自然に折り返さないため、行長を制限しません。
+# MD028: GitHub Alertsの引用ブロックを許可します。
+disable = ["MD013", "MD028"]
+
+# テーブルのスタイルを指定します。
+[MD060]
+enabled = true
+style = "compact"
+
+# <!-- toc --> ... <!-- tocstop --> で囲んだ目次ブロックを見出しと同期させます。
+[MD073]
+enabled = true

@@ -1,0 +1,7 @@
+# === 一時ファイル ===
+.DS_Store
+tmp/
+
+# === Nix / direnv ===
+.direnv/
+result

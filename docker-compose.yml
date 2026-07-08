@@ -1,0 +1,15 @@
+services:
+  code-tunnel:
+    build: .
+    container_name: code-tunnel
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - code_tunnel_home:/home/tunnel
+      - ~/Projects:/home/tunnel/Projects:ro
+      - ~/Projects/algorithm-practice:/home/tunnel/Projects/algorithm-practice:rw
+
+volumes:
+  code_tunnel_home:
